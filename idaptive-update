@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# CHANGE ME: Set IDaptive Tenant URL
+############
+IDAPTIVE_TENANT_URL=aab4889.my.idaptive.app
+
+# Set IDaptive Tenant IP Address
+IDAPTIVE_TENANT_IP=$(dig +short $IDAPTIVE_TENANT_URL | tail -n1)
+
+# CHANGE ME: The AWS Security Group ID assigned to AWS PVWA
+############
+AWS_SG_ID=sg-0832725c3620c2b16
+
+# Retrieve all current AWS Security Group Ingress IP Perms
+AWS_CIDR_IP=$(aws ec2 describe-security-groups --group-ids "$AWS_SG_ID" | jq -r '.SecurityGroups[0].IpPermissions[0].IpRanges[].CidrIp')
+
+# If current IDaptive Tenant IP exists, exit code 0
+if [[ $(aws ec2 describe-security-groups --group-ids "$AWS_SG_ID" | jq -r '.SecurityGroups[0].IpPermissions[0].IpRanges[].CidrIp') == *"$IDAPTIVE_TENANT_IP"* ]]; then
+    printf 'IDaptive Tenant IP %s already exists in %s. Exiting...' "$IDAPTIVE_TENANT_IP" "$AWS_SG_ID"
+    exit 0
+fi
+
+# If we've made it this far, we can update the 
+# AWS Security Group to include the new IDaptive Tenant IP Address
+aws ec2 authorize-security-group-ingress --group-id "$AWS_SG_ID" --protocol tcp --port 443 --cidr "$IDAPTIVE_TENANT_IP"/32
+printf 'IDaptive Tenant IP %s has been added to %s successfully.' "$IDAPTIVE_TENANT_IP" "$AWS_SG_ID"
