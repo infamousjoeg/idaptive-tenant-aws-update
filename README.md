@@ -8,7 +8,6 @@ _Use this script if you do not feel comfortable allowing all potential AWS EC2 i
 
 * [AWS CLI](https://aws.amazon.com/cli/)
 * [IDaptive Tenant](https://www.idaptive.com/free-trial)
-* CyberArk Password Vault Web Access (PVWA) in AWS
 
 ## How it works
 
